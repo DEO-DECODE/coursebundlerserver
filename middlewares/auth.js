@@ -10,3 +10,9 @@ export const isAuthenticated = async (req, res, next) => {
   req.user = await User.findById(decode._id);
   next();
 };
+export const autherizedAdmin = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return next(errorHandler("Only Admin can access this route", 403));
+  }
+  next();
+};
