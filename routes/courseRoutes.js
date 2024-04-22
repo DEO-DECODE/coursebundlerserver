@@ -1,5 +1,6 @@
 import express from "express";
 const router = express.Router();
+import { createCourse } from "../controllers/courseController.js";
 import { isAuthenticated, autherizedAdmin } from "../middlewares/auth.js";
 import singleUpload from "../middlewares/multer.js";
 router.post(
