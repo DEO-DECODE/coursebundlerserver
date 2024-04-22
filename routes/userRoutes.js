@@ -1,7 +1,10 @@
 import express from "express";
-import { login, logout, register } from "../controllers/userController.js";
+import { login, logout, register , changepassword} from "../controllers/userController.js";
+import { isAuthenticated, autherizedAdmin } from "../middlewares/auth.js";
 const router = express.Router();
 router.post("/register", register);
 router.post("/login", login);
 router.get("/logout", logout);
+router.put("/changepassword", isAuthenticated, changepassword );
+router.put("/updateprofile", isAuthenticated);
 export default router;

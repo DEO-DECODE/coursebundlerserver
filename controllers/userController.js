@@ -52,12 +52,58 @@ export const login = async (req, res, next) => {
   }
 };
 export const logout = async (req, res, next) => {
-  res.cookie("token", null, {
-    expires: new Date(Date.now()),
-    httpOnly: true,
-  });
+  try {
+    res.cookie("token", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+    });
+    res.status(200).json({
+      success: true,
+      message: "Logout Successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const changepassword = async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return next(errorHandler("Please enter all the fields", 400));
+    }
+    const user = await User.findById(req.user._id).select("+password");
+    const isMatch = await user.comparePassword(oldPassword);
+    if (!isMatch) {
+      return next(errorHandler("Your Password is incorrect", 401));
+    }
+    if (newPassword !== confirmPassword) {
+      return next(errorHandler("Password doesn't matched", 401));
+    }
+    user.password = newPassword;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const updateprofile = async (req, res, next) => {
+  const { name, email } = req.body;
+  if (!name && !email) {
+    return next(errorHandler("Please fill the fields which you want to update"), 400);
+  }
+  if (name) {
+    user.name = name;
+  }
+  if (email) {
+    user.email = email;
+  }
+  await user.save();
   res.status(200).json({
     success: true,
-    message: "Logout Successfully",
+    message: "Profile Updated Successfully",
   });
+  const user = await user.findById(req.user._id);
 };
