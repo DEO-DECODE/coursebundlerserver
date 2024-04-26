@@ -1,5 +1,6 @@
 import { User } from "../models/User.js";
-import getDataUri from "../utils/dataUri";
+import { Course } from "../models/Course.js";
+import getDataUri from "../utils/dataUri.js";
 import { errorHandler } from "../utils/errorHandler.js";
 import { sendToken } from "../utils/sendToken.js";
 import cloudinary from "cloudinary";
@@ -92,7 +93,10 @@ export const changepassword = async (req, res, next) => {
 export const updateprofile = async (req, res, next) => {
   const { name, email } = req.body;
   if (!name && !email) {
-    return next(errorHandler("Please fill the fields which you want to update"), 400);
+    return next(
+      errorHandler("Please fill the fields which you want to update"),
+      400
+    );
   }
   if (name) {
     user.name = name;
@@ -106,4 +110,32 @@ export const updateprofile = async (req, res, next) => {
     message: "Profile Updated Successfully",
   });
   const user = await user.findById(req.user._id);
+};
+export const addToPlaylist = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const course = await Course.findById(req.query.id);
+    if (!course) {
+      return next(errorHandler("Invalid course id", 404));
+    }
+    const isExist = user.playlist.find((item) => {
+      if (item.course.toString() === Course._id.toString()) {
+        return true;
+      }
+    });
+    if (isExist) {
+      return next(errorHandler("Course Already Exist", 409));
+    }
+    user.playlist.push({
+      course: course._id,
+      poster: course.poster.url,
+    });
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Course Added To The Playlist Successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
 };
