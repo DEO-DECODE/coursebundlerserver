@@ -16,6 +16,7 @@ app.use((err, req, res, next) => {
     statusCode,
   });
 });
+const PORT= process.env.PORT||8000;
 app.listen(process.env.PORT, () => {
   console.log(`Server is runnig on Port : ${process.env.PORT}`);
 });

@@ -4,6 +4,8 @@ import getDataUri from "../utils/dataUri.js";
 import { errorHandler } from "../utils/errorHandler.js";
 import { sendToken } from "../utils/sendToken.js";
 import cloudinary from "cloudinary";
+import { sendMail } from "../utils/sendMail.js";
+import crypto from "crypto";
 export const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -139,11 +141,51 @@ export const addToPlaylist = async (req, res, next) => {
     next(error);
   }
 };
-export const forgotPassword= async (req, res, next)=>{
-  try{
-    
-  }
-  catch(error){
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return next(errorHandler("No Such user exists", 400));
+    }
+    const resetToken = user.getResetToken();
+    await user.save();
+    const url = `http://localhost:8000/api/v1/resetpassword/${resetToken}`;
+    const message = `Click on the link to reset your password. ${url}. If you have not requested then please ignore`;
+    await sendMail(user.email, "Course Bundler Reset Password", message);
+    res.status(200).json({
+      success: true,
+      message: `Reset password token has been send to ${email}`,
+    });
+  } catch (error) {
     next(error);
   }
-}
+};
+export const reserPassword = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: {
+        $gt: Date.now(),
+      },
+    }).select("+password");
+    if (!user) {
+      return next(errorHandler("Token is invalid or expired", 400));
+    }
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Password change successfully",s
+    });
+  } catch (error) {
+    next(error);
+  }
+};
