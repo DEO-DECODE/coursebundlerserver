@@ -139,3 +139,11 @@ export const addToPlaylist = async (req, res, next) => {
     next(error);
   }
 };
+export const forgotPassword= async (req, res, next)=>{
+  try{
+    
+  }
+  catch(error){
+    next(error);
+  }
+}
