@@ -141,6 +141,28 @@ export const addToPlaylist = async (req, res, next) => {
     next(error);
   }
 };
+export const removeFromPlaylist = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const course = await Course.findById(req.query.id);
+    if (!course) {
+      return next(errorHandler("No Such Course found", 404));
+    }
+    const newPlaylist = user.playlist.filter((item) => {
+      if (item.course.toString() !== course._id.toString()) {
+        return item;
+      }
+    });
+    user.playlist = newPlaylist;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Removed from Playlist",
+    });
+  } catch (error) {
+    next(errorHandler(error));
+  }
+};
 export const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -183,7 +205,8 @@ export const reserPassword = async (req, res, next) => {
     await user.save();
     res.status(200).json({
       success: true,
-      message: "Password change successfully",s
+      message: "Password change successfully",
+      s,
     });
   } catch (error) {
     next(error);
