@@ -6,3 +6,6 @@ const getDataUri = (file) => {
   return parser.format(extName, file.buffer);
 };
 export default getDataUri;
+/*
+It will convert file buffers into Data URI format strings.
+*/

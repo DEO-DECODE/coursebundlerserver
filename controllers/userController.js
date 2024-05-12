@@ -212,3 +212,23 @@ export const reserPassword = async (req, res, next) => {
     next(error);
   }
 };
+export const updateProfilePicture = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const file = req.file;
+    const dataUri = getDataUri(file);
+    const mycloud = await cloudinary.v2.uploader.upload(dataUri.content);
+    await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+    user.avatar = {
+      public_id: mycloud.public_id,
+      url: mycloud.secure_url,
+    };
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Avatar Updated Successfully",
+    });
+  } catch (error) {
+    next(errorHandler(error));
+  }
+};
