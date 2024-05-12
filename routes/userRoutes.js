@@ -8,7 +8,10 @@ import {
   addToPlaylist,
   forgotPassword,
   reserPassword,
-  updateProfilePicture
+  updateProfilePicture,
+  getAllUsers,
+  updateRole,
+  deleteUser
 } from "../controllers/userController.js";
 import { isAuthenticated, autherizedAdmin } from "../middlewares/auth.js";
 import singleUpload from "../middlewares/multer.js";
@@ -27,4 +30,9 @@ router.put(
   singleUpload,
   updateProfilePicture
 );
+router.get("/admin/users", isAuthenticated, autherizedAdmin, getAllUsers);
+router
+  .route("/admin/user/:id")
+  .put(isAuthenticated, autherizedAdmin, updateRole)
+  .delete(isAuthenticated, autherizedAdmin, deleteUser);
 export default router;

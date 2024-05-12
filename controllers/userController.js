@@ -232,3 +232,53 @@ export const updateProfilePicture = async (req, res, next) => {
     next(errorHandler(error));
   }
 };
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json({
+      users,
+      success: true,
+      message: "Fetching all users",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const updateRole = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return next(errorHandler("No Such User exists", 404));
+    }
+    if (user.role === "user") {
+      user.role = "admin";
+    } else {
+      user.role = "user";
+    }
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "User Role Updated Successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return next(errorHandler("No Such User Exists", 404));
+    }
+    await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+    user.remove();
+    res.status(200).json({
+      success: true,
+      message: "User Deleted Successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
